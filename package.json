@@ -1,0 +1,20 @@
+{
+  "name": "e-commerce-backend",
+  "version": "1.0.0",
+  "description": "e-commerce backend with payment integration",
+  "homepage": "https://github.com/faizan-devs/E-Commerce-Backend#readme",
+  "bugs": {
+    "url": "https://github.com/faizan-devs/E-Commerce-Backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faizan-devs/E-Commerce-Backend.git"
+  },
+  "license": "ISC",
+  "author": "Faizan Ali",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
