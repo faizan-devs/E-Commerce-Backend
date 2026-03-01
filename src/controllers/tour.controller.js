@@ -14,22 +14,35 @@ exports.getAllTours = async (req, res) => {
         //     .equals('easy');
 
         // BUILD QUERY
-        // 1] Filtering
-        console.log('RAW:', req.query);
+        // 1A] Filtering
         const queryObj = { ...req.query };
         const excludeFields = ['page', 'sort', 'limit', 'fields'];
         excludeFields.forEach((el) => delete queryObj[el]);
-        console.log('COPY:', queryObj);
 
-        // 2] Advanced filtering
+        // 1B] Advanced filtering
         let queryStr = JSON.stringify(queryObj);
         queryStr = queryStr.replace(
             /\b(gte|gt|lte|lt)\b/g,
             (match) => `$${match}`
         );
-        console.log('AFTER REPLACE:', JSON.parse(queryStr));
 
-        const query = await Tour.find(JSON.parse(queryStr));
+        let query = Tour.find(JSON.parse(queryStr));
+
+        // 2] Sorting
+        if (req.query.sort) {
+            const sortBy = req.query.sort.split(',').join(' ');
+            query = query.sort(sortBy);
+        } else {
+            query = query.sort('-createdAt');
+        }
+
+        // 3] Field limiting
+        if (req.query.fields) {
+            const fields = req.query.fields.split(',').join(' ');
+            query = query.select(fields);
+        } else {
+            query = query.select('-__v');
+        }
 
         // EXECUTE QUERY
         const tours = await query;
@@ -45,7 +58,7 @@ exports.getAllTours = async (req, res) => {
     } catch (error) {
         res.status(400).json({
             status: 'fail',
-            message: error,
+            message: error.message,
         });
     }
 };
