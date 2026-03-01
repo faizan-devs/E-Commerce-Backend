@@ -5,6 +5,7 @@ const tourRouter = require('./src/routes/tour.route');
 const userRouter = require('./src/routes/user.route');
 
 const app = express();
+app.set('query parser', 'extended');
 
 // 1) MIDDLEWARES
 if (process.env.NODE_ENV === 'development') {
