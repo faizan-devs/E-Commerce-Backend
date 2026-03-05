@@ -1,51 +1,26 @@
 const Tour = require('../models/tour.model');
+const APIFeatures = require('./../utils/apiFeatures.util');
+
+exports.aliasTopTours = (req, res, next) => {
+    const query =
+        'limit=5&sort=-ratingsAverage,price&fields=name,price,ratingsAverage,summary,difficulty';
+
+    req.url = req.url.includes('?')
+        ? `${req.url}&${query}`
+        : `${req.url}?${query}`;
+
+    next();
+};
 
 exports.getAllTours = async (req, res) => {
     try {
-        // const tours = await Tour.find({
-        //     duration: 5,
-        //     difficulty: 'easy',
-        // });
-
-        // const tours = await Tour.find()
-        //     .where('duration')
-        //     .equals(5)
-        //     .where('difficulty')
-        //     .equals('easy');
-
-        // BUILD QUERY
-        // 1A] Filtering
-        const queryObj = { ...req.query };
-        const excludeFields = ['page', 'sort', 'limit', 'fields'];
-        excludeFields.forEach((el) => delete queryObj[el]);
-
-        // 1B] Advanced filtering
-        let queryStr = JSON.stringify(queryObj);
-        queryStr = queryStr.replace(
-            /\b(gte|gt|lte|lt)\b/g,
-            (match) => `$${match}`
-        );
-
-        let query = Tour.find(JSON.parse(queryStr));
-
-        // 2] Sorting
-        if (req.query.sort) {
-            const sortBy = req.query.sort.split(',').join(' ');
-            query = query.sort(sortBy);
-        } else {
-            query = query.sort('-createdAt');
-        }
-
-        // 3] Field limiting
-        if (req.query.fields) {
-            const fields = req.query.fields.split(',').join(' ');
-            query = query.select(fields);
-        } else {
-            query = query.select('-__v');
-        }
-
         // EXECUTE QUERY
-        const tours = await query;
+        const features = new APIFeatures(Tour.find(), req.query)
+            .filter()
+            .sort()
+            .limitFields()
+            .pagination();
+        const tours = await features.query;
 
         // SEND RESPONSE
         res.status(200).json({
