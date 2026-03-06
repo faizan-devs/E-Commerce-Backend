@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator = require('validator');
 
 const tourSchema = new mongoose.Schema(
     {
@@ -8,6 +9,18 @@ const tourSchema = new mongoose.Schema(
             required: [true, 'A tour must have a name'],
             unique: true,
             trim: true,
+            maxlength: [
+                40,
+                'A tour name must have less or equal then 40 character',
+            ],
+            minlength: [
+                10,
+                'A tour name must have more or equal then 10 character',
+            ],
+            // validate: [
+            //     validator.isAlpha,
+            //     'Tour name must only contain character',
+            // ],
         },
         slug: String,
         duration: {
@@ -21,10 +34,16 @@ const tourSchema = new mongoose.Schema(
         difficulty: {
             type: String,
             required: [true, 'A tour must have a difficulty'],
+            enum: {
+                values: ['easy', 'medium', 'difficult'],
+                message: 'Difficulty is either: easy, medium or difficult',
+            },
         },
         ratingsAverage: {
             type: Number,
             default: 3,
+            min: [1, 'Rating must be 1 or above'],
+            max: [5, 'Rating must be 5 or below'],
         },
         ratingsQuantity: {
             type: Number,
@@ -34,7 +53,15 @@ const tourSchema = new mongoose.Schema(
             type: Number,
             required: [true, 'A tour must have a Price'],
         },
-        priceDiscount: Number,
+        priceDiscount: {
+            type: Number,
+            validate: {
+                validator: function (val) {
+                    return val < this.price;
+                },
+                message: 'Discount price ({VALUE}) be below regular price',
+            },
+        },
         summary: {
             type: String,
             trim: true,
@@ -43,6 +70,14 @@ const tourSchema = new mongoose.Schema(
         description: {
             type: String,
             trim: true,
+            maxength: [
+                500,
+                'A tour summary must have less or equal than 500 character',
+            ],
+            minlength: [
+                200,
+                'A tour summary must have more or equal then 200 character',
+            ],
         },
         imageCover: {
             type: String,
